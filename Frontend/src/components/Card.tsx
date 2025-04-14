@@ -1,4 +1,4 @@
-export function Card() {
+export default function Card() {
     return (
         <div className="flex mx-20 my-10 bg-gray-200 shadow-md p-10 rounded-2xl">
             <div className="w-[50%] ">

@@ -1,5 +1,5 @@
 import VideoPlayer from "./VideoPlayer"
-export function VideoCard() {
+export default function VideoCard() {
     return (
         <div className="flex m-10">
             <div className="w-[40%] m-20">
