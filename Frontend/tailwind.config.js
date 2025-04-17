@@ -1,14 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{html,js,jsx,ts,tsx}",],
+  content: [
+    "./src/**/*.{html,js,jsx,ts,tsx}",
+    // './node_modules/flyonui/dist/js/**/*.js',
+  ],
   theme: {
     extend: {
       colors: {
-        customBeige : '#DDD0C8',
-        customGrey : '#323232'
+        customBg: '#020616',
+        customText: '#022439',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss-motion'),
+  ],
 }
 

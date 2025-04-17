@@ -10,16 +10,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lottiefiles/react-lottie-player": "^3.6.0",
-    "lottie-react": "^2.4.1",
+    "@tabler/icons-react": "^3.31.0",
+    "clsx": "^2.1.1",
+    "flyonui": "^2.1.0",
+    "framer-motion": "^12.7.4",
+    "html2pdf.js": "^0.10.3",
+    "marked": "^15.0.8",
+    "motion": "^12.7.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.1.1"
+    "react-dropzone": "^14.3.8",
+    "react-player": "^2.16.0",
+    "react-router-dom": "^7.1.1",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-motion": "^1.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@iconify-json/tabler": "^1.2.17",
     "@types/node": "^22.14.1",
-    "@types/react": "^18.3.18",
+    "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
