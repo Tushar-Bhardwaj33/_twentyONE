@@ -1,0 +1,15 @@
+base64io
+requests
+groq
+langchain
+langchain-core
+deepgram-sdk
+assemblyai
+tavily
+unstructured
+langchain-nvidia-ai-endpoints
+numpy
+resemblyzer
+python-dotenv
+uvicorn
+fastapi
