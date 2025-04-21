@@ -3,6 +3,10 @@ from tavily import TavilyClient
 from typing import List, Optional, Dict, Any
 import logging
 from tavily.exceptions import TavilyError
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,10 +32,7 @@ class WEB_TavilyClient:
         exclude_domains: Optional[List[str]] = None,
         extract_depth: str = "basic",
         timeout: int = 60,
-        api_key: str = "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"
     ):
-        if api_key is None:
-            raise ValueError("Tavily API key is required")
         self.search_depth = search_depth
         self.topic = topic
         self.days = days
@@ -46,7 +47,7 @@ class WEB_TavilyClient:
         self.exclude_domains = exclude_domains
         self.extract_depth = extract_depth
         self.timeout = timeout
-        self.client = TavilyClient(api_key)
+        self.client = TavilyClient(os.getenv("TAVILY_API_KEY"))
 
     @property
     def search_config(self) -> Dict[str, Any]:

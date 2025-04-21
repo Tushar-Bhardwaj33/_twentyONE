@@ -2,6 +2,10 @@ from groq import Groq
 from deepgram import DeepgramClient, PrerecordedOptions, FileSource
 import assemblyai as aai
 import os
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 __all__ = [
     "Transcribe"
@@ -28,16 +32,14 @@ class Transcribe:
             cls.transcription_by_AssemblyAI,
         ]
 
-    def transcription_by_Groq(self, api_key: str = None, model: str = "whisper-large-v3"):
+    def transcription_by_Groq(self, model: str = "whisper-large-v3"):
         """
         Transcribe using Groq's Whisper API.
         returns a json with all data.
         reference: https://console.groq.com/docs/speech-to-text
         """
-        if not api_key:
-            raise ValueError("Groq API key is required")
 
-        client = Groq(api_key=api_key)
+        client = Groq(os.getenv("GROQ_API_KEY"))
 
         self.transcript = client.audio.transcriptions.create(
             file=self.file_bytes,
@@ -46,7 +48,7 @@ class Transcribe:
         )
         return self.transcript
 
-    def transcription_by_Deepgram(self, api_key: str = None, model: str = "whisper", language="en", punctuate=True, diarize=True, smart_format=True):
+    def transcription_by_Deepgram(self, model: str = "whisper", language="en", punctuate=True, diarize=True, smart_format=True):
         """
         Transcribe using Deepgram's API.
         returns a json with all data.
@@ -55,7 +57,7 @@ class Transcribe:
         if not api_key:
             raise ValueError("Deepgram API key is required")
 
-        deepgram = DeepgramClient(api_key)
+        deepgram = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
         
         payload: FileSource = {
             "buffer": self.file_bytes,
@@ -73,7 +75,7 @@ class Transcribe:
         self.transcript = response.to_json(indent=4)
         return self.transcript
 
-    def transcription_by_AssemblyAI(self, config = None, api_key: str = None, async_mode: bool = False, polling_interval: int = 3.0):
+    def transcription_by_AssemblyAI(self, config = None, async_mode: bool = False, polling_interval: int = 3.0):
         """
         Transcribe using AssemblyAI's API.
         if async_mode is True, it will return a future object with the status of the transcription. then call .result() to get the transcript class object.
@@ -82,9 +84,8 @@ class Transcribe:
         methods available: [text,words,utterances,words,word_search]
         reference: https://www.assemblyai.com/docs/sdk-references/python
         """
-        aai.settings.api_key = api_key
-        if not api_key:
-            raise ValueError("AssemblyAI API key is required")
+        aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
+
         if config is None:
             config = aai.TranscriptionConfig(
                     speaker_labels=True,# Optional: if you want speaker info

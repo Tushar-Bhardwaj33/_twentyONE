@@ -3,6 +3,10 @@ import requests
 from groq import Groq
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 __all__ = ["ImageToText"]
@@ -10,19 +14,19 @@ __all__ = ["ImageToText"]
 class ImageToText:
     @classmethod
     def get_available_methods(cls):
-        return [cls.get_response,cls.get_method,cls.get_response_by_Groq,cls.get_response_by_nvidia_nim]
+        return [cls.get_response, cls.get_method, cls.get_response_by_Groq, cls.get_response_by_nvidia_nim]
     
-    def get_response_by_nvidia_nim(self, prompt: str = None, image_b64: str = None, image_file: str = None, api_key: str = None):
+    def get_response_by_nvidia_nim(self, prompt: str = None, image_b64: str = None, image_file: str = None):
         if image_b64 is None:
             with open("your_image.jpg", "rb") as image_file:
                 image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
         invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
         assert len(image_b64) < 180_000, \
         "To upload larger images, use the assets API (see docs)"
-        
+
         headers = {
-        "Authorization": f"Bearer {api_key}" if api_key else "Bearer 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",
-        "Accept": "application/json"
+            "Authorization": f"Bearer {os.getenv('NVIDIA_NIM_microsoft/phi-3.5-vision-instruct_API_KEY')}",
+            "Accept": "application/json"
         }
 
         if(prompt is None):
@@ -47,10 +51,8 @@ class ImageToText:
         else:
             raise Exception(f"Error: {response.status_code} - {response.text}")
         
-    def get_response_by_Groq(self, prompt: str = None, image_b64: str = None, image_file: str = None, api_key: str = None):
-        if api_key is None:
-            api_key = input("Groq API key is required: ")
-        client = Groq(api_key)
+    def get_response_by_Groq(self, prompt: str = None, image_b64: str = None, image_file: str = None):
+        client = Groq(os.getenv("GROQ_API_KEY"))
         if prompt is None:
             prompt = f'Summarize this image in 5 short sentences. <img src="data:image/jpeg;base64,{image_b64}" />'
         completion = client.chat.completions.create(
@@ -71,7 +73,10 @@ class ImageToText:
         for chunk in completion:
             print(chunk.choices[0].delta.content or "", end="")
 
-    def get_response(self, prompt: str = None, image_b64: str = None, image_file: str = None, api_key: str = None):
+    def get_response(self, prompt: str = None, image_b64: str = None, image_file: str = None):
+        if image_b64 is None:
+            with open("your_image.jpg", "rb") as image_file:
+                image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
         if prompt is None:
             prompt = f'Summarize this image in 5 short sentences. <img src="data:image/jpeg;base64,{image_b64}" />'
         model = init_chat_model(
