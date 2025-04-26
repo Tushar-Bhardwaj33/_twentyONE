@@ -5,7 +5,7 @@ langchain
 langchain-core
 deepgram-sdk
 assemblyai
-tavily
+# tavily
 unstructured
 langchain-nvidia-ai-endpoints
 numpy
@@ -13,3 +13,26 @@ resemblyzer
 python-dotenv
 uvicorn
 fastapi
+
+# RAG
+pytesseract
+pdf2image
+python-magic
+tiktoken
+langchain-chroma
+langchain-groq
+
+
+!pip install base64io requests groq langchain langchain-core deepgram-sdk assemblyai unstructured langchain-nvidia-ai-endpoints numpy resemblyzer python-dotenv uvicorn fastapi pytesseract pdf2image python-magic tiktoken langchain-chroma langchain-groq
+!pip install pdfminer.six
+!pip install pi-heif unstructured_inference
+!pip install pytesseract
+!pip install unstructured_pytesseract
+!pip install hf_xet
+!pip install langchain_community langchain-huggingface
+!pip install PyPDF2
+!pip install -U langchain-nvidia-ai-endpoints
+!pip install langgraph langchain_community  -U langchain-groq
+!pip install langchain
+!pip install -U langchain-cohere
+!pip install deep_translator

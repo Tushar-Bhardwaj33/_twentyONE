@@ -74,7 +74,7 @@ class embeddings:
       else:
           print('Inference failed.')
 
-    def embed_audio(self, audio_file_path: str = None):
+    def embed_voice(self, audio_file_path: str = None):
       if audio_file_path is None:
           raise Exception("Audio file path is required")
       wav=preprocess_wav(Path(audio_file_path))
