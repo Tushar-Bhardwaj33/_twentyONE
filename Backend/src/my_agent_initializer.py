@@ -25,7 +25,7 @@ fallback_model = init_chat_model("meta/llama-3.1-405b-instruct", model_provider=
 tools = [search, translator]
 
 TwentyONE = create_react_agent(
-        model=model,
-        tools=tools,
-        checkpointer=memory
-    )
+        model=model,           
+        tools=tools,           
+        checkpointer=memory    
+    )                           
