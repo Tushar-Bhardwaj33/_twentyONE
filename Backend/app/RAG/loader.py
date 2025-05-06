@@ -6,8 +6,10 @@ from langchain.schema.document import Document
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 from langchain.retrievers.multi_vector import MultiVectorRetriever
 import os
+from dotenv import load_dotenv
 
-os.environ["NVIDIA_API_KEY"] = "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"
+# Load the .env file
+load_dotenv()
 
 class MultiModalRAGLoader:
     def __init__(self, collection_name="multi_modal_rag", model="nvidia/nv-embedqa-mistral-7b-v2"):

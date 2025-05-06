@@ -6,8 +6,8 @@ from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 import os
 
+# Load environment variables from .env file
 load_dotenv()
-
 
 __all__ = ["ImageToText"]
 
@@ -24,25 +24,30 @@ class ImageToText:
         assert len(image_b64) < 180_000, \
         "To upload larger images, use the assets API (see docs)"
 
+        # Retrieve NVIDIA API key from environment variables
+        nvidia_api_key = os.getenv("NVIDIA_NIM_API_KEY")
+        if not nvidia_api_key:
+            raise ValueError("Missing NVIDIA_NIM_API_KEY in environment variables.")
+
         headers = {
-            "Authorization": f"Bearer {os.getenv('NVIDIA_NIM_microsoft/phi-3.5-vision-instruct_API_KEY')}",
+            "Authorization": f"Bearer {nvidia_api_key}",
             "Accept": "application/json"
         }
 
-        if(prompt is None):
+        if prompt is None:
             prompt = f'Summarize this image in 5 short sentences. <img src="data:image/jpeg;base64,{image_b64}" />'
 
         payload = {
-        "model": 'microsoft/phi-3.5-vision-instruct',
-        "messages": [
-            {
-            "role": "user",
-            "content": prompt
-            }
-        ],
-        "max_tokens": 512,  # Reduce max tokens
-        "temperature": 0.20,
-        "top_p": 0.70,
+            "model": 'microsoft/phi-3.5-vision-instruct',
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "max_tokens": 512,  # Reduce max tokens
+            "temperature": 0.20,
+            "top_p": 0.70,
         }
 
         response = requests.post(invoke_url, headers=headers, json=payload)
@@ -52,7 +57,12 @@ class ImageToText:
             raise Exception(f"Error: {response.status_code} - {response.text}")
         
     def get_response_by_Groq(self, prompt: str = None, image_b64: str = None, image_file: str = None):
-        client = Groq(os.getenv("GROQ_API_KEY"))
+        # Retrieve GROQ API key from environment variables
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            raise ValueError("Missing GROQ_API_KEY in environment variables.")
+
+        client = Groq(groq_api_key)
         if prompt is None:
             prompt = f'Summarize this image in 5 short sentences. <img src="data:image/jpeg;base64,{image_b64}" />'
         completion = client.chat.completions.create(
@@ -94,5 +104,5 @@ class ImageToText:
                 {"type": "image_url", "image_url": image_url}
             ]
         )
-        response=model.invoke([msg])
+        response = model.invoke([msg])
         return response

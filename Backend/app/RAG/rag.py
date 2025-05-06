@@ -1,7 +1,7 @@
 import os
 from data_extraction_tools import GET, PDFChunker
 from summarizer import SummarizerAndImageDescriber
-from Backend.src.RAG.loader import MultiModalRAGLoader
+from Backend.app.RAG.loader import MultiModalRAGLoader
 
 class RAG:
     def __init__(self, collection_name, groq_api_key=None, nvidia_api_key=None):

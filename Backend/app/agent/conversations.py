@@ -53,7 +53,7 @@ class ConversationSession:
 
 # Example usage
 def main():
-    from my_agent_initializer import TwentyONE
+    from Backend.src.agent.my_agent_initializer import TwentyONE
 
     SYSTEM_PROMPT = """You are TwentyONE — a world-class AI meeting assistant designed to deliver clarity, insight, and productivity at scale.
 

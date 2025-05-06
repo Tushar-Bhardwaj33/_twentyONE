@@ -11,6 +11,11 @@ import json
 import numpy as np
 from resemblyzer import VoiceEncoder, preprocess_wav
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load the .env file
+load_dotenv()
 
 __all__ = ["embeddings"]
 

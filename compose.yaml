@@ -1,0 +1,32 @@
+services:
+  python-backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: python-backend
+    restart: unless-stopped
+    init: true
+    env_file: ./Backend/.env
+    # If you do not have a .env file for the backend, comment out the line above
+    ports:
+      - "8000:8000"  # FastAPI default port
+    networks:
+      - app-network
+
+  typescript-frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: typescript-frontend
+    restart: unless-stopped
+    init: true
+    # depends_on:
+    #   - python-backend
+    ports:
+      - "4173:4173"  # Vite preview server port
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

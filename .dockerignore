@@ -1,0 +1,68 @@
+# Version control
+.git/
+.gitignore
+.svn/
+.hg/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+
+# Node.js artifacts
+node_modules/
+npm-debug.log
+yarn-debug.log
+
+# Build outputs
+build/
+dist/
+out/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test and debug
+*.log
+debug/
+test/
+tests/
+
+# Temporary files and folders
+tmp/
+temp/
+*.tmp
+
+# Environment and secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+.local/
+
+# Documentation and markdown
+README*
+*.md
+docs/
+
+# Docker and compose files
+Dockerfile*
+docker-compose*
+
+# Project-specific
+README.md.bak
+
+# Miscellaneous
+*.bak
+
+# Exclude lock files from ignore (as per instructions)
+# (Do not add *.lock to this file)
