@@ -3,9 +3,9 @@ from data_extraction_tools import GET, PDFChunker
 from summarizer import SummarizerAndImageDescriber
 from Backend.app.RAG.loader import MultiModalRAGLoader
 
-class RAG:
+class INGEST:
     def __init__(self, collection_name, groq_api_key=None, nvidia_api_key=None):
-        """Initialize the RAG instance with collection name and optional API keys."""
+        """Initialize the INGEST instance with collection name and optional API keys."""
         self.collection_name = collection_name
         self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY")
         self.nvidia_api_key = nvidia_api_key or os.getenv("NVIDIA_API_KEY")

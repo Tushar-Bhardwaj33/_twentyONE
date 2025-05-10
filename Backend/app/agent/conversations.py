@@ -53,7 +53,7 @@ class ConversationSession:
 
 # Example usage
 def main():
-    from Backend.src.agent.my_agent_initializer import TwentyONE
+    from Backend.app.agent.my_agent_initializer import TwentyONE
 
     SYSTEM_PROMPT = """You are TwentyONE — a world-class AI meeting assistant designed to deliver clarity, insight, and productivity at scale.
 
@@ -97,7 +97,3 @@ AI: '''@Alex expressed concerns about the QA phase duration. Alternative proposa
             session.run(user_input)
     except KeyboardInterrupt:
         print("\nSession saved. Goodbye!")
-
-
-if __name__ == "__main__":
-    main()
