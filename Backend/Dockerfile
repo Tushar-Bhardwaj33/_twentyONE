@@ -33,9 +33,7 @@ RUN --mount=type=cache,target=$PIP_CACHE_DIR \
 
 # Copy the rest of the application code
 COPY --link app/ ./app/
-COPY --link src/ ./src/
 COPY --link setup.sh ./
-COPY --link main.py ./
 
 # Final stage: minimal image with only runtime deps and code
 FROM base AS final
@@ -47,9 +45,7 @@ COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code from builder
 COPY --from=builder /app/app ./app
-COPY --from=builder /app/src ./src
 COPY --from=builder /app/setup.sh ./
-COPY --from=builder /app/main.py ./
 
 # Set environment so venv is used
 ENV PATH="/app/.venv/bin:$PATH"
@@ -61,4 +57,4 @@ USER appuser
 EXPOSE 8000
 
 # Entrypoint (adjust if your main.py is not the FastAPI entrypoint)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

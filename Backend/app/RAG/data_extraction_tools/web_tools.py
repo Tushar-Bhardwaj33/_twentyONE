@@ -2,7 +2,14 @@
 from tavily import TavilyClient
 from typing import List, Optional, Dict, Any
 import logging
-from tavily.exceptions import TavilyError
+from tavily.errors import (
+    BadRequestError,
+    ForbiddenError,
+    InvalidAPIKeyError,
+    MissingAPIKeyError,
+    TimeoutError,
+    UsageLimitExceededError,
+)
 from dotenv import load_dotenv
 import os
 
@@ -95,7 +102,14 @@ class WEB_TavilyClient:
                 **{k: v for k, v in self.search_config.items() if v is not None}
             )
             return response
-        except TavilyError as e:
+        except (
+            BadRequestError,
+            ForbiddenError,
+            InvalidAPIKeyError,
+            MissingAPIKeyError,
+            TimeoutError,
+            UsageLimitExceededError,
+        ) as e:
             logging.error(f"Error during search: {e}")
             raise
 
@@ -113,6 +127,13 @@ class WEB_TavilyClient:
                 **{k: v for k, v in self.extraction_config.items() if v is not None}
             )
             return response
-        except TavilyError as e:
+        except (
+            BadRequestError,
+            ForbiddenError,
+            InvalidAPIKeyError,
+            MissingAPIKeyError,
+            TimeoutError,
+            UsageLimitExceededError,
+        ) as e:
             logging.error(f"Error during extraction: {e}")
             raise

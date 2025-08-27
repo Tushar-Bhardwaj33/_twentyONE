@@ -4,9 +4,29 @@ import { FileUploadUI } from "./ui/file-upload";
 
 export function FileUpload() {
   const [files, setFiles] = useState<File[]>([]);
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = async (files: File[]) => {
     setFiles(files);
-    console.log(files);
+    if (files.length > 0) {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("http://localhost:8000/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+        console.log("File uploaded successfully:", data);
+      } catch (error) {
+        console.error("There was a problem with the file upload:", error);
+      }
+    }
   };
 
   return (

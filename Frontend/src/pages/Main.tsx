@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import ReactPlayer from "react-player";
 import DownloadAndCopyPdf from "../components/PDF";
 import { PlaceholdersAndVanishInput } from "../components/ui/placeholders-and-vanish-input";
 import { FileUpload } from "../components/FileUpload";
+import { v4 as uuidv4 } from 'uuid';
+
 
 const transcript: string = `# Project Documentation
 
@@ -33,10 +35,19 @@ const greet = (name: string): string => {
 
 Thanks for using our Markdown to PDF converter!`
 
+interface Message {
+    sender: 'user' | 'assistant';
+    text: string;
+}
+
 export default function MainPage() {
     const [selectedTab, setSelectedTab] = useState<'Summary' | 'Ask'>('Summary');
     const sidebarList = ["New Meeting", "Previous Meeting", "Summary", "Ask TwentyOne", "Help"];
-    const [sender, setSender] = useState<'user' | 'assistant'>('user');
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [inputValue, setInputValue] = useState<string>('');
+    const [sessionId] = useState<string>(uuidv4());
+
+
     const placeholders = [
         "What's the first rule of Fight Club?",
         "Who is Tyler Durden?",
@@ -44,13 +55,45 @@ export default function MainPage() {
         "Write a Javascript method to reverse a string",
         "How to assemble your own PC?",
     ];
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.value);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
     };
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+    const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("submitted");
+        if (!inputValue.trim()) return;
+
+        const userMessage: Message = { sender: 'user', text: inputValue };
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
+
+        const currentInputValue = inputValue;
+        setInputValue('');
+
+        try {
+            const response = await fetch('http://localhost:8000/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: currentInputValue, session_id: sessionId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            const assistantMessage: Message = { sender: 'assistant', text: data.response };
+            setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+            const errorMessage: Message = { sender: 'assistant', text: "Sorry, I'm having trouble connecting to the server." };
+            setMessages((prevMessages) => [...prevMessages, errorMessage]);
+        }
     };
+
     return (
         <div className="bg-white">
             <div className="flex">
@@ -111,25 +154,17 @@ export default function MainPage() {
                             </div> :
                             <div className="bg-customBg h-[600px] my-5 mx-6 rounded-2xl ">
                                 <div className="h-[85%] w-full overflow-auto">
-                                    {sender === 'user' ? (
-                                        <div className="flex justify-end m-6">
-                                            <div className="chat chat-sender">
-                                                <div className="bg-white text-customBg p-3 m-2 max-w-[800px] rounded-2xl">
-                                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate esse eveniet necessitatibus excepturi ducimus nesciunt repellendus quis quae, velit iste, dolorem explicabo deleniti tenetur illum? Sequi odio recusandae excepturi facilis.
+                                    {messages.map((msg, index) => (
+                                        <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} m-6`}>
+                                            <div className={`chat ${msg.sender === 'user' ? 'chat-sender' : ''}`}>
+                                                <div className={`${msg.sender === 'user' ? 'bg-white text-customBg' : 'bg-customBg text-white'} p-3 m-2 max-w-[800px] rounded-2xl`}>
+                                                    {msg.text}
                                                 </div>
                                             </div>
                                         </div>
-                                    ) : (
-                                        <div className="flex justify-start m-6">
-                                            <div className="bg-customBg text-white p-3 max-w-[800px] rounded-2xl">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio culpa, aperiam autem recusandae facilis molestias cumque nostrum. Est, minus. Incidunt itaque, odit numquam consectetur assumenda dolor sequi eum modi excepturi.
-                                            </div>
-                                        </div>
-                                    )}
-
+                                    ))}
                                 </div>
                                 <div className="w-full h-[15%] py-6 px-12">
-                                    {/* <input className="w-full rounded-full p-6 h-12 text-lg outline-none " type="text" /> */}
                                     <PlaceholdersAndVanishInput
                                         placeholders={placeholders}
                                         onChange={handleChange}

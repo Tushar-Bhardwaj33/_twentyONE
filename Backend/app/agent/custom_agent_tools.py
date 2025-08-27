@@ -1,5 +1,5 @@
 from langchain_core.tools import tool
-from langchain_agent.data_extraction_tools.web_tools import WEB_TavilyClient
+from ..RAG.data_extraction_tools.web_tools import WEB_TavilyClient
 from typing import Annotated, List
 from deep_translator import GoogleTranslator
 
