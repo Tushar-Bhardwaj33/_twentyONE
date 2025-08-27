@@ -1,4 +1,3 @@
-assemblyai
 base64io
 deep_translator
 deepgram-sdk
