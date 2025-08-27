@@ -1,6 +1,5 @@
 from groq import Groq
 from deepgram import DeepgramClient, PrerecordedOptions, FileSource
-import assemblyai as aai
 import os
 from dotenv import load_dotenv
 import os
@@ -29,7 +28,6 @@ class Transcribe:
         return [
             cls.transcription_by_Groq,
             cls.transcription_by_Deepgram,
-            cls.transcription_by_AssemblyAI,
         ]
 
     def transcription_by_Groq(self, model: str = "whisper-large-v3"):
@@ -54,10 +52,11 @@ class Transcribe:
         returns a json with all data.
         reference: https://developers.deepgram.com/docs/pre-recorded-audio#transcribe-a-local-file
         """
+        api_key = os.getenv("DEEPGRAM_API_KEY")
         if not api_key:
             raise ValueError("Deepgram API key is required")
 
-        deepgram = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
+        deepgram = DeepgramClient(api_key)
         
         payload: FileSource = {
             "buffer": self.file_bytes,
@@ -75,29 +74,5 @@ class Transcribe:
         self.transcript = response.to_json(indent=4)
         return self.transcript
 
-    def transcription_by_AssemblyAI(self, config = None, async_mode: bool = False, polling_interval: int = 3.0):
-        """
-        Transcribe using AssemblyAI's API.
-        if async_mode is True, it will return a future object with the status of the transcription. then call .result() to get the transcript class object.
-        if polling_interval is set, it will poll the status of the transcription every polling_interval seconds.
-        if async_mode is False, it will return a transcript object with the text of the transcription.
-        methods available: [text,words,utterances,words,word_search]
-        reference: https://www.assemblyai.com/docs/sdk-references/python
-        """
-        aai.settings.api_key = os.getenv("ASSEMBLYAI_API_KEY")
-
-        if config is None:
-            config = aai.TranscriptionConfig(
-                    speaker_labels=True,# Optional: if you want speaker info
-                    punctuate=True,     # Clean punctuation
-                    format_text=True,
-            )
-        if async_mode:
-            aai.settings.polling_interval = polling_interval
-            self.transcript = aai.Transcriber().transcribe_async(self.file_bytes, config)
-        else:
-            self.transcript = aai.Transcriber().transcribe(self.file_bytes, config)
-        return self.transcript
-    
     def transcription_by_nvidia_nim(self, api_key: str = None, model: str = "whisper-large-v3"):
         pass
