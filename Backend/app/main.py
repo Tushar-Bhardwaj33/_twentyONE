@@ -62,9 +62,23 @@ async def upload_file(file: UploadFile = File(...)):
         transcripts[session_id] = transcript.text
 
         ingestor = INGEST(collection_name=collection_name)
-        retriever = ingestor.process_transcript(transcript.text)
+        ingestor.process_transcript(transcript.text)
 
-        return {"transcript": transcript.text, "session_id": session_id}
+        # Serialize the transcript words to a list of dictionaries
+        words = []
+        if transcript.words:
+            for word in transcript.words:
+                words.append({
+                    "text": word.text,
+                    "start": word.start,
+                    "end": word.end
+                })
+
+        return {
+            "transcript": transcript.text,
+            "session_id": session_id,
+            "words": words
+        }
     except Exception as e:
         return {"error": str(e)}
 

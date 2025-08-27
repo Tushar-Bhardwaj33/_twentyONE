@@ -1,43 +1,24 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent, useRef } from "react";
 import ReactPlayer from "react-player";
 import DownloadAndCopyPdf from "../components/PDF";
 import { PlaceholdersAndVanishInput } from "../components/ui/placeholders-and-vanish-input";
 import { FileUpload } from "../components/FileUpload";
 import { v4 as uuidv4 } from 'uuid';
 
-
-const transcript: string = `# Project Documentation
-
-## ✨ Features
-
-- Easy to write using Markdown
-- Converts to styled PDF
-- No text overlap
-- Proper spacing, bullets, code blocks, and headings
-
-## 🔧 Installation
-
-1. Install dependencies using npm or yarn
-2. Write your content in **Markdown**
-3. Press "Download PDF"
-
-## 💻 Code Example
-
-\`\`\`ts
-const greet = (name: string): string => {
-  return \`Hello, \${name}!\`;
-};
-\`\`\`
-
-## 📌 Notes
-
-> This is a blockquote. Use it for important notes or quotes.
-
-Thanks for using our Markdown to PDF converter!`
-
 interface Message {
     sender: 'user' | 'assistant';
     text: string;
+}
+
+interface Word {
+    text: string;
+    start: number;
+    end: number;
+}
+
+interface Transcript {
+    text: string;
+    words: Word[];
 }
 
 export default function MainPage() {
@@ -45,8 +26,13 @@ export default function MainPage() {
     const sidebarList = ["New Meeting", "Previous Meeting", "Summary", "Ask TwentyOne", "Help"];
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState<string>('');
-    const [sessionId] = useState<string>(uuidv4());
-
+    const [sessionId, setSessionId] = useState<string>(uuidv4());
+    const [videoUrl, setVideoUrl] = useState<string>("");
+    const [transcript, setTranscript] = useState<Transcript | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const playerRef = useRef<ReactPlayer>(null);
+    const transcriptContainerRef = useRef<HTMLDivElement>(null);
+    const [currentTime, setCurrentTime] = useState<number>(0);
 
     const placeholders = [
         "What's the first rule of Fight Club?",
@@ -58,6 +44,29 @@ export default function MainPage() {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
+    };
+
+    const handleFileUpload = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch("http://localhost:8000/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            setTranscript({ text: data.transcript, words: data.words });
+            setSessionId(data.session_id);
+            setVideoUrl(URL.createObjectURL(file));
+        } catch (error) {
+            console.error("There was a problem with the file upload:", error);
+        }
     };
 
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -94,65 +103,98 @@ export default function MainPage() {
         }
     };
 
+    const handleWordClick = (time: number) => {
+        if (playerRef.current) {
+            playerRef.current.seekTo(time / 1000, 'seconds');
+        }
+    };
+
+    const filteredWords = transcript?.words.filter(word =>
+        word.text.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="bg-white">
             <div className="flex">
-                <div className="w-[15%] bg-customBg h-screen text-lg text-white flex flex-col justify-center gap-6
-                p-6 ">
+                <div className="w-[15%] bg-customBg h-screen text-lg text-white flex flex-col justify-center gap-6 p-6">
                     {sidebarList.map((item, index) => (
                         <div key={index} className="cursor-pointer hover:underline decoration-white">{item}</div>
                     ))}
                 </div>
-                <div className=" w-[85%] overflow-y-auto h-screen ">
+                <div className="w-[85%] overflow-y-auto h-screen">
                     <div className="flex w-full">
                         <div className="w-[70%] h-[600px] p-5">
-                            {/* <ReactPlayer
-                                url="https://www.youtube.com/watch?v=uLrReyH5cu0"
-                                controls
-                                playing
-                                loop
-                                muted
-                                className="rounded-2xl overflow-hidden"
-                                width="100%"
-                                height="100%"
-                            /> */}
-                            <FileUpload/>
+                            {videoUrl ? (
+                                <ReactPlayer
+                                    ref={playerRef}
+                                    url={videoUrl}
+                                    controls
+                                    playing
+                                    loop
+                                    muted
+                                    className="rounded-2xl overflow-hidden"
+                                    width="100%"
+                                    height="100%"
+                                    onProgress={(progress) => setCurrentTime(progress.playedSeconds * 1000)}
+                                />
+                            ) : (
+                                <FileUpload onFileUpload={handleFileUpload} />
+                            )}
                         </div>
                         <div className="w-[30%] bg-customBg h-[562px] rounded-2xl my-5 mr-2">
                             <div className="flex justify-between p-4 text-white">
                                 <div className="text-2xl">Transcript</div>
-                                <DownloadAndCopyPdf text={transcript} />
+                                {transcript && <DownloadAndCopyPdf text={transcript.text} />}
                             </div>
 
                             <div className="mx-4 my-1">
-                                <input className="bg-white w-full py-1 px-3 rounded-lg outline-none" type="text" />
+                                <input
+                                    className="bg-white w-full py-1 px-3 rounded-lg outline-none"
+                                    type="text"
+                                    placeholder="Search transcript..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
-                            <div className="text-white h-[430px] overflow-y-auto p-4 my-2">
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo quae illum dignissimos cupiditate, soluta eaque. Accusamus laboriosam perspiciatis quibusdam aperiam ipsa est consequuntur dolore, voluptatum qui sed exercitationem. Sapiente, repellendus.
-                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatum ducimus saepe praesentium ab numquam distinctio inventore aliquam enim autem repellendus, quod perferendis quam. Dolores asperiores eos distinctio ratione, sint non!
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo quae illum dignissimos cupiditate, soluta eaque. Accusamus laboriosam perspiciatis quibusdam aperiam ipsa est consequuntur dolore, voluptatum qui sed exercitationem. Sapiente, repellendus.
-                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatum ducimus saepe praesentium ab numquam distinctio inventore aliquam enim autem repellendus, quod perferendis quam. Dolores asperiores eos distinctio ratione, sint non!
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo quae illum dignissimos cupiditate, soluta eaque. Accusamus laboriosam perspiciatis quibusdam aperiam ipsa est consequuntur dolore, voluptatum qui sed exercitationem. Sapiente, repellendus.
-                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatum ducimus saepe praesentium ab numquam distinctio inventore aliquam enim autem repellendus, quod perferendis quam. Dolores asperiores eos distinctio ratione, sint non!
+                            <div className="text-white h-[430px] overflow-y-auto p-4 my-2" ref={transcriptContainerRef}>
+                                {filteredWords?.map((word, index) => {
+                                    const isPlaying = currentTime >= word.start && currentTime <= word.end;
+                                    const wordRef = React.createRef<HTMLSpanElement>();
 
+                                    if (isPlaying) {
+                                        wordRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+
+                                    return (
+                                        <span
+                                            key={index}
+                                            ref={wordRef}
+                                            onClick={() => handleWordClick(word.start)}
+                                            className={`cursor-pointer hover:bg-gray-600 p-1 rounded-md ${isPlaying ? 'bg-gray-500' : ''}`}
+                                        >
+                                            {word.text}{' '}
+                                        </span>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
                     <div>
                         <div className="flex gap-4 mx-8 text-xl">
-                            <div className={`cursor-pointer text-black ${selectedTab == 'Summary' ? "border-b-2 border-customBg" : ""}`} onClick={() => setSelectedTab('Summary')}>Summary</div>
-                            <div className={`cursor-pointer ${selectedTab == 'Ask' ? "border-b-2 border-customBg" : ""}`} onClick={() => setSelectedTab('Ask')}>Ask</div>
+                            <div className={`cursor-pointer text-black ${selectedTab === 'Summary' ? "border-b-2 border-customBg" : ""}`} onClick={() => setSelectedTab('Summary')}>Summary</div>
+                            <div className={`cursor-pointer ${selectedTab === 'Ask' ? "border-b-2 border-customBg" : ""}`} onClick={() => setSelectedTab('Ask')}>Ask</div>
                         </div>
-                        {selectedTab == 'Summary' ?
+                        {selectedTab === 'Summary' ? (
                             <div className="bg-customBg h-[600px] my-5 mx-6 rounded-2xl">
-                                <div className=" overflow-auto">
+                                <div className="overflow-auto">
                                     <div className="p-4 bg-customBg flex justify-end gap-4 rounded-2xl">
-                                        <DownloadAndCopyPdf text={transcript} />
+                                        {transcript && <DownloadAndCopyPdf text={transcript.text} />}
                                     </div>
-                                    <div className="text-white m-6">{transcript}</div>
+                                    <div className="text-white m-6">{transcript?.text}</div>
                                 </div>
-                            </div> :
-                            <div className="bg-customBg h-[600px] my-5 mx-6 rounded-2xl ">
+                            </div>
+                        ) : (
+                            <div className="bg-customBg h-[600px] my-5 mx-6 rounded-2xl">
                                 <div className="h-[85%] w-full overflow-auto">
                                     {messages.map((msg, index) => (
                                         <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} m-6`}>
@@ -171,10 +213,11 @@ export default function MainPage() {
                                         onSubmit={onSubmit}
                                     />
                                 </div>
-                            </div>}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
